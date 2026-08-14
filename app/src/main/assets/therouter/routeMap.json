@@ -1,0 +1,30 @@
+[
+  {
+    "path": "/player/main",
+    "className": "com.example.player.fragment.PlayerFragment",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "/app/main",
+    "className": "com.example.lijiemusic.MainActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "/app/launch",
+    "className": "com.example.lijiemusic.LaunchActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "/dynamics/main",
+    "className": "com.example.dynamics.ui.activity.DynamicsActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  }
+]

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 🌟 改成 base-config，全局允许 HTTP 明文流量 -->
+    <!-- 这样不管是 m7 还是 m801，或者是别人的接口，都不会再被拦截了 -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,204 @@
+package com.example.base
+
+import android.content.ComponentName
+import android.content.Context
+import android.net.Uri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
+
+/**
+ * MediaController 帮助类
+ *
+ * 职责：
+ * 1. 管理与 MusicService 的连接
+ * 2. 提供播放控制方法（播放、暂停、上下曲、进度跳转）
+ * 3. 监听播放状态并回调给 ViewModel
+ */
+class MediaControllerHelper(
+    private val context: Context,
+    private val listener: MediaControllerListener
+) {
+
+    private var mediaController: MediaController? = null
+    private var controllerFuture: ListenableFuture<MediaController>? = null  //Future，一个Java接口，代表一个尚未完成的异步任务的凭证
+
+    /**
+     * 连接到 MusicService
+     */
+    fun connect() {
+        val sessionToken = SessionToken(
+            context,
+            ComponentName(context, "com.example.player.MusicService")
+        )
+
+        controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()//异步
+        controllerFuture?.addListener({
+            mediaController = controllerFuture?.get()
+            setupPlayerListener()
+            listener.onConnected()
+        }, MoreExecutors.directExecutor())
+    }
+
+    /**
+     * 断开连接
+     */
+    fun disconnect() {
+        mediaController?.let {
+            it.removeListener(playerListener)
+            it.release()
+        }
+        mediaController = null
+        controllerFuture?.cancel(true)
+        controllerFuture = null
+    }
+
+    /**
+     * 设置播放器监听器
+     */
+    private fun setupPlayerListener() {
+        mediaController?.addListener(playerListener)
+    }
+
+    /**
+     * 播放器状态监听器
+     */
+    private val playerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            listener.onPlayingStateChanged(isPlaying)
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                Player.STATE_READY -> {
+                    mediaController?.let {
+                        listener.onDurationChanged(it.duration)
+                    }
+                }
+                //监听如果是停止播放就调用循环播放，实际就是下一首
+                Player.STATE_ENDED -> {
+                    listener.onPlaybackEnded()
+                }
+            }
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            mediaItem?.let {
+                listener.onMediaItemChanged(it)
+            }
+        }
+
+        override fun onPositionDiscontinuity(
+            oldPosition: Player.PositionInfo,
+            newPosition: Player.PositionInfo,
+            reason: Int
+        ) {
+            listener.onPositionChanged(newPosition.positionMs)
+        }
+    }
+
+    /**
+     * 播放单首歌曲
+     *
+     * @param songId 歌曲 ID
+     * @param url 播放链接
+     */
+    fun playSingleSong(songId: String, url: String) {
+        mediaController?.let { controller ->
+            // 如果已存在 MediaItem，只更新 URI，保留已有元数据（通知栏数据）
+            if (controller.currentMediaItem != null) {
+                val newItem = controller.currentMediaItem?.buildUpon()
+                    ?.setMediaId(songId)
+                    ?.setUri(Uri.parse(url))
+                    ?.build() ?: return
+                controller.replaceMediaItem(controller.currentMediaItemIndex, newItem)
+            } else {
+                val mediaItem = MediaItem.Builder()
+                    .setMediaId(songId)
+                    .setUri(url)
+                    .build()
+                controller.setMediaItem(mediaItem)
+            }
+            controller.prepare()
+            controller.play()
+        }
+    }
+
+    /**
+     * 继续播放
+     */
+    fun play() {
+        mediaController?.play()
+    }
+
+    /**
+     * 暂停播放
+     */
+    fun pause() {
+        mediaController?.pause()
+    }
+
+    /**
+     * 切换播放/暂停
+     */
+    fun togglePlayPause() {
+        mediaController?.let {
+            if (it.isPlaying) {
+                it.pause()
+            } else {
+                it.play()
+            }
+        }
+    }
+
+
+    fun seekTo(positionMs: Long) {
+        mediaController?.seekTo(positionMs)
+    }
+
+
+    fun getCurrentPosition(): Long {
+        return mediaController?.currentPosition ?: 0
+    }
+
+
+    fun getDuration(): Long {
+        return mediaController?.duration ?: 0
+    }
+
+
+    fun isPlaying(): Boolean {
+        return mediaController?.isPlaying ?: false
+    }
+
+    fun updateMetadata(title: String, artist: String, coverUrl: String?) {
+        mediaController?.let {
+            val metadata = MediaMetadata.Builder()
+                .setTitle(title)
+                .setArtist(artist)
+                .setArtworkUri(coverUrl?.let { url -> Uri.parse(url) })
+                .build()
+
+            val currentItem = it.currentMediaItem
+            if (currentItem != null) {
+                val newItem = currentItem.buildUpon()
+                    .setMediaMetadata(metadata)
+                    .build()
+                it.replaceMediaItem(it.currentMediaItemIndex, newItem)
+            }
+        }
+    }
+
+    interface MediaControllerListener {
+        fun onConnected()
+        fun onPlayingStateChanged(isPlaying: Boolean)
+        fun onDurationChanged(duration: Long)
+        fun onPositionChanged(position: Long)
+        fun onMediaItemChanged(mediaItem: MediaItem)
+        fun onPlaybackEnded()
+    }
+}

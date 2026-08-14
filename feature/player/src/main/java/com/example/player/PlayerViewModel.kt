@@ -1,0 +1,319 @@
+package com.example.player
+
+import SongWikiData
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.example.base.BaseViewModel
+import com.example.base.PlayerManager
+import com.example.net.RetrofitClient
+import com.example.player.model.ArtistData
+import com.example.player.model.Lyric
+import com.example.player.model.LyricParser
+import com.example.player.model.MoreSongItem
+import com.example.player.model.SimilarArtist
+import com.example.player.model.Song
+import com.example.player.model.SongData
+import com.example.player.model.SongUrlData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+
+class PlayerViewModel : BaseViewModel() {
+    val api = RetrofitClient.createApi(PlayerApi::class.java)
+
+    //用户id监听
+    private val _currentSongId = MutableStateFlow<Long?>(null)
+    val currentSongId: StateFlow<Long?> = _currentSongId.asStateFlow()
+
+    //当前播放进度 (0-100)
+    private val _progress = MutableStateFlow(0)
+    val progress: StateFlow<Int> = _progress.asStateFlow()
+
+    //判断该歌曲是否喜欢
+    private val _isLiked = MutableStateFlow(false)
+    val isLiked: StateFlow<Boolean> = _isLiked
+
+    // ========== 歌曲信息 ==========
+
+    //当前播放的歌曲
+    private val _currentSong = MutableStateFlow<SongUrlData?>(null)
+    val currentSong= _currentSong.asStateFlow()
+
+    //当前歌曲索引
+    private val _currentIndex = MutableStateFlow<Int>(0)
+    val currentIndex= _currentIndex.asStateFlow()
+
+    /** 歌曲封面 URL */
+    private val _coverUrl = MutableStateFlow<String?>(null)
+    val coverUrl= _coverUrl.asStateFlow()
+
+
+    /** 歌手名 */
+    private val _artistName = MutableStateFlow("未知歌手")
+    val artistName = _artistName.asStateFlow()
+
+    /** 歌曲名 */
+    private val _songName = MutableStateFlow("未知歌曲")
+    val songName= _songName.asStateFlow()
+
+
+    //解析后的歌词列表（含逐字/逐句）
+    private val _lyricList = MutableStateFlow<List<Lyric>?>(null)
+    val lyricList= _lyricList.asStateFlow()
+
+   //歌词加载状态
+    private val _lyricLoading = MutableStateFlow(false)
+    val lyricLoading= _lyricLoading.asStateFlow()
+
+    //历史听歌
+    private val _wikiData = MutableStateFlow<SongWikiData?>(null)
+    val wikiData: StateFlow<SongWikiData?> = _wikiData
+
+    //歌曲详情
+    private val _songDetail = MutableStateFlow<SongData?>(null)
+    val songDetail: StateFlow<SongData?> = _songDetail
+
+    //歌手
+    private val _singer = MutableStateFlow<ArtistData?>(null)
+    val singer: StateFlow<ArtistData?> = _singer
+
+    //相似歌词
+    private val _similarSong = MutableStateFlow<List<Song>?>(null)
+    val similarSong: StateFlow<List<Song>?> = _similarSong
+
+    //相似歌手
+    private val _similarSinger = MutableStateFlow<List<SimilarArtist>?>(null)
+    val similarSinger : StateFlow<List<SimilarArtist>?> = _similarSinger
+
+    //歌手歌曲
+    private val _moreSong = MutableStateFlow<List<MoreSongItem>?>(null)
+    val moreSongItem : StateFlow<List<MoreSongItem>?> = _moreSong
+
+    private val _sharecode = MutableStateFlow<Int>(0)
+    val sharecode= _sharecode.asStateFlow()
+    fun updateSongId(id: Long) {
+        _currentSongId.value = id
+    }
+
+
+
+    // ========== 网络请求 ==========
+
+    /** 检查歌曲是否可用 */
+    fun checkMusicAvailable(id: String) {
+        launchRequest {
+            val result = api.checkMusicIsAvailable(id)
+            if (!result.success) {
+                throw Exception(result.message)
+            }
+        }
+    }
+
+    /** 获取歌曲播放链接 */
+    fun fetchMusicUrl(id: String, level: String = "standard") {
+        launchRequest {
+            val result = api.getMusicUrl(id, level)
+            // 处理返回的歌曲链接
+            if (result.code == 200 && result.data.isNotEmpty()) {
+                val songData = result.data[0]
+                if (songData.url != null) {
+                    //更新当前歌曲信息
+                    _currentSong.value = songData
+                }
+            }
+        }
+    }
+
+    /** 获取歌曲详情（封面、歌手名等） */
+    fun fetchSongDetail(songId: String) {
+        launchRequest {
+            val result = api.getSongDetail(songId)
+            if (result.code == 200 && result.songs.isNotEmpty()) {
+                val song = result.songs[0]
+                _songName.value = song.name
+                _artistName.value = song.ar.joinToString(", ") { it.name }
+                _coverUrl.value = song.al.picUrl
+                updateSongId(song.id)
+
+                PlayerManager.updateCurrentSongDetail(song)
+            }
+        }
+    }
+
+    /** 格式化时间 (毫秒 -> mm:ss) */
+    @SuppressLint("DefaultLocale")
+    fun formatTime(millis: Long): String {
+        val totalSeconds = millis / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
+    }
+
+
+    fun fetchLyric(songId: String) {
+        viewModelScope.launch {
+            _lyricLoading.value = true
+            // 切歌时先清空旧歌词，避免 UI 闪烁残留
+            _lyricList.value = emptyList()
+            try {
+                val response = api.getlyric(songId)
+                Log.d("hyj","返回的歌词："+response.toString())
+                val lrc = response.lineLyric?.lyric ?: ""
+                val yrc = response.wordLyric?.lyric ?: ""
+                val parsed = LyricParser.parseLyric(lrc, yrc)
+                _lyricList.value = parsed
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _lyricList.value = emptyList()
+            } finally {
+                _lyricLoading.value = false
+            }
+        }
+    }
+
+    fun checkSongIsLiked(songId: String) {
+        viewModelScope.launch {
+            try {
+                val api = RetrofitClient.createApi(PlayerApi::class.java)
+                val response = api.checkSongLike("[$songId]")
+                Log.d("hyj","是否喜欢的的返回码：${response.code},返回的喜欢的歌曲id${response.ids}")
+                if (response.code == 200) {
+                    val likedIds = response.ids ?: emptyList()
+                    _isLiked.value = likedIds.contains(songId.toLong())
+                    Log.d("hyj", "【红心检测】当前播放歌曲ID: $songId")
+                    Log.d("hyj", "【红心检测】服务器返回的喜欢列表: $likedIds")
+                    Log.d("hyj", "【红心检测】最终匹配结果: ${isLiked.value}")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun toggleLike(songId: String, uid: String) {
+
+        val currentStatus = _isLiked.value
+        val targetStatus = !currentStatus
+        _isLiked.value = targetStatus
+
+        viewModelScope.launch {
+            try {
+                val api = RetrofitClient.createApi(PlayerApi::class.java)
+                val response = api.toggleLikeSong(songId, uid, targetStatus)
+
+                Log.d("hyj","喜欢返回码：${response.code}")
+                if (response.code != 200) {
+                    _isLiked.value = currentStatus
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("hyj", "点赞接口发生异常了！原因: ${e.message}", e)
+                _isLiked.value = currentStatus
+            }
+        }
+    }
+
+    fun loadWikiData(songId: Long) {
+        viewModelScope.launch {
+            try {
+                val api = RetrofitClient.createApi(PlayerApi::class.java)
+                val response = api.getSongListenHistory(songId)
+                Log.d("hyj","历史听歌的返回码：${response.code},返回的数据${response.data}")
+                if (response.code == 200 && response.data != null) {
+                    _wikiData.value = response.data
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("hyj", "请求出错了，崩溃原因: ${e.message}", e)
+            }
+        }
+    }
+
+    //取出歌词详情
+    fun fetchSongDetail2(songId: String) {
+        launchRequest {
+            val api = RetrofitClient.createApi(PlayerApi::class.java)
+            val result = api.getSongDetail2(songId.toLong())
+            if (result.code == 200 ) {
+                _songDetail.value = result.data
+            }
+        }
+    }
+
+    fun formatTimestampToDate(timestamp: Long): String {
+        //定义需要的日期格式："yyyy" 代表年，"MM" 代表月，"dd" 代表日
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        //将时间戳转为 Date 对象，并进行格式化
+        return sdf.format(Date(timestamp))
+    }
+
+    //取出歌手详情
+    fun fetchSingerDetail(songId: String) {
+        launchRequest {
+            val api = RetrofitClient.createApi(PlayerApi::class.java)
+            val result = api.getSongerDetail(songId.toLong())
+            if (result.code == 200 ) {
+                _singer.value = result.data
+            }
+        }
+    }
+
+    //请求相似歌曲
+    fun fetchSimilarSongDetail(songId: String) {
+        launchRequest {
+            val api = RetrofitClient.createApi(PlayerApi::class.java)
+            val result = api.getSimilarSongDetail(songId.toLong())
+            if (result.code == 200 ) {
+                _similarSong.value = result.songs
+            }
+        }
+    }
+
+    //取出相似的歌手
+    fun fetchSimilarSingerDetail(songId: String) {
+        launchRequest {
+            val api = RetrofitClient.createApi(PlayerApi::class.java)
+            val result = api.getSimilarSongerDetail(songId.toLong())
+            Log.d("hyj","请求相似歌手返回的请求码:${result.code}，数据为${result.artists}")
+            if (result.code == 200 ) {
+                _similarSinger.value = result.artists
+            }else{
+                Log.e("hyj","请求相似歌手发生错误了")
+            }
+        }
+    }
+
+    //取出歌手歌曲
+    fun fetchMoreSingerDetail(songId: String) {
+        launchRequest {
+            val api = RetrofitClient.createApi(PlayerApi::class.java)
+            val result = api.getMoreSongs(songId.toLong())
+            Log.d("hyj","请求歌手歌曲返回的请求码:${result.code}，数据为${result.songs}")
+            if (result.code == 200 ) {
+                _moreSong.value = result.songs
+            }else{
+                Log.e("hyj","请求相似歌手发生错误了")
+            }
+        }
+    }
+
+    //发送分想歌曲
+    fun fetchShareSinger(songId: Long,msg : String) {
+        launchRequest {
+            val api = RetrofitClient.createApi(PlayerApi::class.java)
+            val result = api.getshareSong(songId,msg)
+            Log.d("hyj","分享歌曲返回的请求码:${result.code}")
+            _sharecode.value = result.code
+        }
+    }
+    fun resetShareCode() {
+        // 假设你的 sharecode 是 MutableStateFlow
+        _sharecode.value = 0 // 使用 0 代表没有任何操作的初始状态
+    }
+}
