@@ -65,9 +65,8 @@
 
     <fragment
         android:id="@+id/fragment_playlist"
-        android:name="com.example.playlist.PlaylistFragment"
-        android:label="歌单详情"
-        tools:layout="@layout/fragment_playlist">
+        android:name="com.example.playlist.ui.fragment.PlaylistFragment"
+        android:label="歌单详情">
         <deepLink app:uri="musicapp://playlist/{playlistId}" />
         <argument
             android:name="playlistId"

@@ -1,4 +1,4 @@
-package com.example.playlist.model
+package com.example.playlist.network.bean
 
 import com.google.gson.annotations.SerializedName
 
