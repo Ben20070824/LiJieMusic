@@ -1,9 +1,9 @@
-package com.example.playlist
+package com.example.playlist.network.api
 
-import com.example.playlist.model.CoverUpdateRes
-import com.example.playlist.model.DeleteSongFromListRes
-import com.example.playlist.model.PlaylistRes
-import com.example.playlist.model.ToggleSongOrderRes
+import com.example.playlist.network.bean.CoverUpdateRes
+import com.example.playlist.network.bean.DeleteSongFromListRes
+import com.example.playlist.network.bean.PlaylistRes
+import com.example.playlist.network.bean.ToggleSongOrderRes
 import okhttp3.MultipartBody
 import retrofit2.http.GET
 import retrofit2.http.Multipart

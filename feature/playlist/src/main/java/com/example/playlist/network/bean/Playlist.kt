@@ -1,4 +1,4 @@
-package com.example.playlist.model
+package com.example.playlist.network.bean
 
 data class Playlist(
     val coverImgUrl: String,

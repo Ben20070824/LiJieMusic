@@ -1,17 +1,15 @@
-package com.example.playlist
+package com.example.playlist.ui.viewmodel
 
-import android.app.Application
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.net.RetrofitClient
-import com.example.playlist.model.Track
-import com.example.util.ToastUtil
+import com.example.playlist.network.api.PlayListApi
+import com.example.playlist.network.bean.Track
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +17,6 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.http.Url
 import java.io.ByteArrayOutputStream
 
 class PlaylistViewModel : ViewModel() {
