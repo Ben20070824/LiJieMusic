@@ -41,7 +41,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0") // 建议使用最新版本
     implementation(project(":core:base"))
     implementation(project(":core:net"))

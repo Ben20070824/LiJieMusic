@@ -1,6 +1,6 @@
 package com.example.profile.network.bean
 
-import kotlinx.serialization.SerialName
+import com.google.gson.annotations.SerializedName
 
 /**
  * @author Ben
@@ -18,7 +18,7 @@ data class Playlist(
     val containsTracks: Boolean, // 是否包含歌曲
     val copied: Boolean, // 是否为复制歌单
     val coverImgId: Long, // 封面图片ID
-    @SerialName("coverImgId_str")
+    @SerializedName("coverImgId_str")
     val coverImgIdStr: String, // 封面图片ID的字符串形式
     val coverImgUrl: String, // 封面图片URL
     val createTime: Long, // 创建时间（时间戳）

@@ -2,11 +2,14 @@ package com.example.video.fragment
 
 import androidx.viewpager2.widget.ViewPager2
 import com.example.base.BaseFragment
+import com.example.therouter.RoutePath
 import com.example.util.DrawerUtil
 import com.example.video.adapter.ViewPagerAdapter
 import com.example.video.databinding.FragmentVideoBinding
 import com.google.android.material.tabs.TabLayoutMediator
+import com.therouter.router.Route
 
+@Route(path = RoutePath.VIDEO_MAIN)
 class VideoFragment : BaseFragment<FragmentVideoBinding>(FragmentVideoBinding::inflate) {
     private val list= listOf(
         { AllMvFragment()},{ TopMvFragment()},{ MvRecommendFragment()}

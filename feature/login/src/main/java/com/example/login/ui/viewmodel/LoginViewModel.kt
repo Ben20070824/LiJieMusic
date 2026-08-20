@@ -11,8 +11,6 @@ import com.example.login.network.bean.GetQrKeyRes
 import com.example.model.UserManager
 import com.example.net.CookieManager
 import com.example.net.RetrofitClient
-import com.example.therouter.RoutePath
-import com.therouter.TheRouter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -81,11 +79,10 @@ class LoginViewModel : ViewModel() {
                     // fallback: 直接注入原始cookie
                     CookieManager.injectCookie(cookie)
                 }
+                _loginSuccess.value = true
             } catch (e: Exception) {
                 Log.e("ljh","游客登录失败"+e.message)
-                return@launch
             }
-            TheRouter.build(RoutePath.MAIN_ACTIVITY).navigation()
         }
     }
 

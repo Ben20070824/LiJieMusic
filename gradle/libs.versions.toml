@@ -15,7 +15,6 @@ fragmentKtx = "1.8.6"
 constraintlayout = "2.2.1"
 recyclerview = "1.4.0"
 lifecycle = "2.8.7"
-navigation = "2.8.9"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 gson = "2.11.0"
@@ -25,8 +24,6 @@ coroutines = "1.9.0"
 media3 = "1.5.1"
 mockk = "1.13.14"
 transportationConsumer = "4.1.0"
-navigationFragmentKtx = "2.9.8"
-navigationUiKtx = "2.9.8"
 glide = "4.16.0"
 media3CommonKtx = "1.10.1"
 legacySupportV4 = "1.0.0"
@@ -55,9 +52,6 @@ lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-view
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 
-# Navigation
-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 # Retrofit + OkHttp + Gson
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
@@ -94,8 +88,6 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 transportation-consumer = { group = "com.google.android.libraries.mapsplatform.transportation", name = "transportation-consumer", version.ref = "transportationConsumer" }
-androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
-androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 #glide
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }

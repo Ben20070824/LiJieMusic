@@ -38,6 +38,7 @@ dependencies {
     //导入base
     implementation(project(":core:base"))
     implementation(project(":core:net"))
+    implementation(project(":core:therouter"))
 
     //viewmodel
     implementation(libs.lifecycle.viewmodel.ktx)
@@ -60,7 +61,4 @@ dependencies {
     implementation(libs.gson)
 
     implementation (libs.glide)
-
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
 }

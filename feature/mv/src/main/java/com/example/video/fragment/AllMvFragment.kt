@@ -7,15 +7,18 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.PopupWindow
 import androidx.core.graphics.drawable.toDrawable
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavDeepLinkRequest
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.base.BaseFragment
+import com.example.therouter.NavigationFragmentUtil
+import com.example.therouter.RouteParams
+import com.example.therouter.RoutePath
 import com.example.util.ToastUtil
+import com.therouter.TheRouter
 import com.example.video.VideoViewModel
 import com.example.video.adapter.AllMvAdapter
 import com.example.video.databinding.FragmentAllMvBinding
@@ -27,10 +30,10 @@ import kotlinx.coroutines.launch
 class AllMvFragment : BaseFragment<FragmentAllMvBinding>(FragmentAllMvBinding::inflate) {
     private val viewModel: VideoViewModel by viewModels()
     private val mAdapter = AllMvAdapter { id ->
-        val request = NavDeepLinkRequest.Builder
-            .fromUri(Uri.parse("musicapp://mvPlay/id/$id"))
-            .build()
-        findNavController().navigate(request)
+        val fragment = TheRouter.build(RoutePath.MV_PLAY)
+            .withString(RouteParams.MvParams.MV_ID, id.toString())
+            .createFragment<Fragment>()
+        (activity as? NavigationFragmentUtil)?.addFragment(fragment)
     }
     private var _popBinding: PopContentBinding? = null
     private val popBinding get() = _popBinding!!

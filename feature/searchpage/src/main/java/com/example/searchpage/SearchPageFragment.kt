@@ -1,18 +1,22 @@
 package com.example.searchpage
 
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavDeepLinkRequest
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.base.BaseFragment
 import com.example.searchpage.databinding.FragmentSearchPageBinding
+import com.example.searchpage.adapter.PlaylistAdapter
+import com.example.therouter.NavigationFragmentUtil
+import com.example.therouter.RouteParams
+import com.example.therouter.RoutePath
+import com.example.util.DrawerUtil
+import com.therouter.TheRouter
+import com.therouter.router.Route
 import kotlinx.coroutines.launch
 import kotlin.getValue
-import androidx.core.net.toUri
-import com.example.searchpage.adapter.PlaylistAdapter
-import com.example.util.DrawerUtil
 
+@Route(path = RoutePath.SEARCH_PAGE_MAIN)
 class SearchPageFragment : BaseFragment<FragmentSearchPageBinding>(FragmentSearchPageBinding::inflate){
 
     private val viewModel: SearchPageViewmodel by viewModels()
@@ -30,11 +34,8 @@ class SearchPageFragment : BaseFragment<FragmentSearchPageBinding>(FragmentSearc
         super.initEvent()
 
         binding.tvFakeSearch.setOnClickListener {
-            //对于这个暗号进行访问
-            val request = NavDeepLinkRequest.Builder
-                .fromUri("musicapp://search_page".toUri())
-                .build()
-            findNavController().navigate(request)
+            val fragment = TheRouter.build(RoutePath.SEARCH_MAIN).createFragment<Fragment>()
+            (activity as? NavigationFragmentUtil)?.addFragment(fragment)
         }
         binding.btnDrawer.setOnClickListener {
             (activity as? DrawerUtil)?.openDrawer()
@@ -53,10 +54,10 @@ class SearchPageFragment : BaseFragment<FragmentSearchPageBinding>(FragmentSearc
     }
 
     private fun navigateToPlaylist(playlistId: Long) {
-        val request = NavDeepLinkRequest.Builder
-            .fromUri("musicapp://playlist/$playlistId".toUri())
-            .build()
-        findNavController().navigate(request)
+        val fragment = TheRouter.build(RoutePath.PLAYLIST_MAIN)
+            .withString(RouteParams.PlaylistParams.PLAYLIST_ID, playlistId.toString())
+            .createFragment<Fragment>()
+        (activity as? NavigationFragmentUtil)?.addFragment(fragment)
     }
 
     override fun onDestroyView() {

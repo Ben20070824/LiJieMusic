@@ -1,16 +1,13 @@
 package com.example.lijiemusic
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.LifecycleOwner
 import com.example.lijiemusic.databinding.DialogLogoutBinding
 import com.example.net.CookieManager
-import com.example.therouter.RoutePath
-import com.therouter.TheRouter
+import com.example.therouter.NavigationFragmentUtil
 import kotlin.system.exitProcess
 
 class LogoutDialog : DialogFragment() {
@@ -33,7 +30,7 @@ class LogoutDialog : DialogFragment() {
             }
             btnAccount.setOnClickListener {
                 CookieManager.logout(requireContext())
-                TheRouter.build(RoutePath.LAUNCH_MAIN).navigation()
+                (activity as? NavigationFragmentUtil)?.showLogin()
             }
             btnApplication.setOnClickListener {
                 activity?.finishAffinity()

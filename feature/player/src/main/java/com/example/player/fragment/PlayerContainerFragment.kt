@@ -5,7 +5,10 @@ import android.view.View
 import com.example.base.BaseFragment
 import com.example.player.adapter.ViewPagerAdapter
 import com.example.player.databinding.FragmentPlayerContainerBinding
+import com.example.therouter.RoutePath
+import com.therouter.router.Route
 
+@Route(path = RoutePath.PLAYER_CONTAINER)
 class PlayerContainerFragment :
     BaseFragment<FragmentPlayerContainerBinding>(FragmentPlayerContainerBinding::inflate) {
 

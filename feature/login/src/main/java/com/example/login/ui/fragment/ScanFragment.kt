@@ -5,9 +5,11 @@ import androidx.fragment.app.viewModels
 import com.example.base.BaseComposeFragment
 import com.example.login.ui.viewmodel.LoginViewModel
 import com.example.login.ui.screen.ScanScreen
+import com.example.therouter.NavigationFragmentUtil
 import com.example.therouter.RoutePath
-import com.therouter.TheRouter
+import com.therouter.router.Route
 
+@Route(path = RoutePath.LOGIN_SCAN)
 class ScanFragment : BaseComposeFragment() {
     private val viewModel: LoginViewModel by viewModels()
 
@@ -16,8 +18,7 @@ class ScanFragment : BaseComposeFragment() {
         ScanScreen(
             viewModel = viewModel,
             onLoginSuccess = {
-                TheRouter.build(RoutePath.MAIN_ACTIVITY).navigation()
-                activity?.finish()
+                (activity as? NavigationFragmentUtil)?.showMainContent()
             }
         )
     }

@@ -7,7 +7,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.base.BaseFragment
@@ -17,19 +16,22 @@ import com.example.search.adapter.HotSearchWordAdapter
 import com.example.search.adapter.SearchResultAdapter
 import com.example.search.adapter.SuggestAdapter
 import com.example.search.databinding.FragmentSearchBinding
+import com.example.therouter.RoutePath
+import com.therouter.router.Route
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
+@Route(path = RoutePath.SEARCH_MAIN)
 class SearchFragment : BaseFragment<FragmentSearchBinding>(FragmentSearchBinding::inflate) {
 
     private val viewModel: SearchViewModel by viewModels()
-    private val HotsearcgAdapter = HotSearchWordAdapter{text ->
+    private val HotsearcgAdapter = HotSearchWordAdapter { text ->
         binding.search.setText(text)
         binding.tvSearch.performClick()
     }
-    private val guessAdapter = GuessAdapter{text ->
+    private val guessAdapter = GuessAdapter { text ->
         binding.search.setText(text)
         binding.tvSearch.performClick()
     }
@@ -104,7 +106,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>(FragmentSearchBinding
 
         binding.back.setOnClickListener {
             //告诉导航仪退回上一个页面
-            findNavController().navigateUp()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
 

@@ -9,14 +9,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.base.BaseFragment
+import com.example.therouter.RouteParams
+import com.example.therouter.RoutePath
 import com.example.video.VideoViewModel
 import com.example.video.adapter.MvCommentAdapter
 import com.example.video.databinding.FragmentMvPlayBinding
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils
+import com.therouter.router.Autowired
+import com.therouter.router.Route
 import kotlinx.coroutines.launch
 
+@Route(path = RoutePath.MV_PLAY)
 class MvPlayFragment : BaseFragment<FragmentMvPlayBinding>(FragmentMvPlayBinding::inflate) {
-    val id : Long by lazy { requireArguments().getString("mvId")?.toLong() ?: 0L }
+    @Autowired(name = RouteParams.MvParams.MV_ID)
+    var mvId: String = ""
+    val id: Long get() = mvId.toLongOrNull() ?: 0L
     private val viewModel : VideoViewModel by viewModels()
     private var orientationUtils: OrientationUtils? = null
 

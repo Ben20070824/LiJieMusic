@@ -13,14 +13,17 @@ import com.example.base.PlayerManager
 import com.example.base.SongDetail
 import com.example.playlist.ui.screen.PlaylistScreen
 import com.example.playlist.ui.viewmodel.PlaylistViewModel
+import com.example.therouter.RouteParams
+import com.example.therouter.RoutePath
 import com.example.util.ToastUtil
+import com.therouter.router.Autowired
+import com.therouter.router.Route
 
+@Route(path = RoutePath.PLAYLIST_MAIN)
 class PlaylistFragment : BaseComposeFragment() {
     private val viewModel: PlaylistViewModel by viewModels()
-
-    private val playlistId: String by lazy {
-        arguments?.getString("playlistId") ?: ""
-    }
+    @Autowired(name = RouteParams.PlaylistParams.PLAYLIST_ID)
+    lateinit var playlistId: String
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent() // 系统级 API：隐式 Intent 调用系统相册

@@ -71,8 +71,4 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":core:therouter"))
     implementation(project(":core:model"))
-
-    //navigation
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
 }

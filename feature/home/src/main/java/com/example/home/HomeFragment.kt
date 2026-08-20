@@ -5,8 +5,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavDeepLinkRequest
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.base.BaseFragment
@@ -15,12 +14,17 @@ import com.example.home.Adapter.Rv1Adapter
 import com.example.home.Adapter.Rv2Adapter
 import com.example.home.Adapter.Rv3Adapte
 import com.example.home.databinding.FragmentHomeBinding
+import com.example.therouter.NavigationFragmentUtil
+import com.example.therouter.RouteParams
+import com.example.therouter.RoutePath
 import com.example.util.DrawerUtil
+import com.therouter.TheRouter
+import com.therouter.router.Route
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
+@Route(path = RoutePath.HOME_MAIN)
 class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::inflate){
 
     //获取viewmodel
@@ -75,12 +79,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         }
         //跳往搜索页面
         binding.imgtosearch.setOnClickListener {
-            //对于这个暗号进行访问
-            val request = NavDeepLinkRequest.Builder
-                .fromUri("musicapp://search_page".toUri())
-                .build()
-            findNavController().navigate(request)
-
+            val fragment = TheRouter.build(RoutePath.SEARCH_MAIN).createFragment<Fragment>()
+            (activity as? NavigationFragmentUtil)?.addFragment(fragment)
         }
         //rv3rv4点击事件的书写
         rv3Adapte.OnSongClickListener3(object : Rv3Adapte.OnSongClickListener {
@@ -168,9 +168,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     }
 
     private fun navigateToPlaylist(playlistId: Long) {
-        val request = NavDeepLinkRequest.Builder
-            .fromUri("musicapp://playlist/$playlistId".toUri())
-            .build()
-        findNavController().navigate(request)
+        val fragment = TheRouter.build(RoutePath.PLAYLIST_MAIN)
+            .withString(RouteParams.PlaylistParams.PLAYLIST_ID, playlistId.toString())
+            .createFragment<Fragment>()
+        (activity as? NavigationFragmentUtil)?.addFragment(fragment)
     }
 }

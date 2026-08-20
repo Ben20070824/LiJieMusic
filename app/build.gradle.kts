@@ -17,6 +17,23 @@ android {
         compose=true
     }
 
+    // TheRouter 插件生成的路由表在 build/therouter/，需在打包前复制到 assets
+    sourceSets {
+        getByName("main") {
+            assets.srcDir("${buildDir}/therouter")
+        }
+    }
+
+tasks.register<Copy>("copyTheRouterAssets") {
+    from("${buildDir}/therouter")
+    into("${projectDir}/src/main/assets/therouter")
+    include("*.therouter")
+}
+
+tasks.matching { it.name.contains("merge") && it.name.contains("Assets") }.configureEach {
+    dependsOn("copyTheRouterAssets")
+}
+
     defaultConfig {
         applicationId = "com.example.lijiemusic"
         minSdk = 24
@@ -46,8 +63,6 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.media3.common.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.material)
 
     implementation(libs.media3.exoplayer)

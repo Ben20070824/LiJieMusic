@@ -18,16 +18,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LiJieMusic"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".LaunchActivity"
-            android:exported="true">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        </activity>
-
         <meta-data
             android:name="therouter_version"
             android:value="1.4.0-rc1" />
@@ -37,8 +27,13 @@
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize"
-            />
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
     </application>
 </manifest>

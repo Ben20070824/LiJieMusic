@@ -64,9 +64,6 @@ dependencies {
 
     implementation (libs.glide)
 
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-
     // GSYVideoPlayer 视频播放器 (v9.0.0 — 已拆分为多模块)
     implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:v9.0.0-release-jitpack")
     implementation("com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer-exo2:v9.0.0-release-jitpack")

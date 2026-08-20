@@ -1,4 +1,4 @@
-package com.example.comment
+package com.example.comment.ui
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -11,21 +11,35 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.base.BaseFragment
+import com.example.comment.CommentAdapter
+import com.example.comment.CommentViewModel
+import com.example.comment.OnCommentItemClickListener
+import com.example.comment.R
 import com.example.comment.databinding.FragmentCommentBinding
+import com.example.therouter.RouteParams
+import com.example.therouter.RoutePath
 import com.example.util.ToastUtil
+import com.therouter.router.Autowired
+import com.therouter.router.Route
 import kotlinx.coroutines.launch
 
+@Route(path = RoutePath.COMMENT_MAIN)
 class CommentFragment : BaseFragment<FragmentCommentBinding>(FragmentCommentBinding::inflate) {
 
     private val viewModel: CommentViewModel by viewModels()
     private val commentAdapter = CommentAdapter()
 
+    @Autowired(name = RouteParams.CommentParams.SONG_ID)
+    var songId: String = ""
+    @Autowired(name = RouteParams.CommentParams.SONG_NAME)
+    var songName: String = "未知歌曲"
+    @Autowired(name = RouteParams.CommentParams.COVER_URL)
+    var coverUrl: String = ""
     var id = ""
     var commendId = ""
     var sorttype : Int = 1
@@ -58,10 +72,7 @@ class CommentFragment : BaseFragment<FragmentCommentBinding>(FragmentCommentBind
 
     override fun initView() {
         super.initView()
-        val songId = arguments?.getString("songId") ?: ""
         id = songId
-        val songName = arguments?.getString("songName") ?: "未知歌曲"
-        val coverUrl = arguments?.getString("coverUrl") ?: ""
         Log.d("hyj","得到的歌曲数据-${songId},-${songName},-${coverUrl}")
         binding.tvSong.text = songName
         //设置封面
@@ -118,7 +129,7 @@ class CommentFragment : BaseFragment<FragmentCommentBinding>(FragmentCommentBind
 
         binding.ivBack.setOnClickListener {
             //返回上一个fragment
-            findNavController().navigateUp()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
 

@@ -8,13 +8,12 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
 import androidx.core.graphics.toColorInt
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.base.BaseFragment
 import com.example.base.PlayerManager
@@ -22,8 +21,11 @@ import com.example.model.UserManager
 import com.example.player.PlayerViewModel
 import com.example.player.R
 import com.example.player.databinding.FragmentPlayerBinding
+import com.example.therouter.NavigationFragmentUtil
+import com.example.therouter.RouteParams
 import com.example.therouter.RoutePath
 import com.example.util.ToastUtil
+import com.therouter.TheRouter
 import com.therouter.router.Route
 import kotlinx.coroutines.launch
 
@@ -151,25 +153,13 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>(FragmentPlayerBinding
 
         // 评论按钮
         binding.btnComments.setOnClickListener {
-            //Therouter无法在fragment里面跳转
-//            TheRouter.build(RoutePath.COMMENT_FRAGMENT) //跳往评论
-//                .withString("songId", id.toString())
-//                .withString("songName", viewModel.songName.value)
-//                .withString("coverUrl", viewModel.coverUrl.value)
-//                .navigation(requireContext())
-//            ToastUtil.popToast("正在跳往评论曲", requireContext())
-
-            //利用DeepLink深层链接跳转
-            val songId = id
-            Log.d("test_lyric", "当前歌曲ID: $id")
-            val songName = songName
-            // 注意：如果是图片网址，里面有斜杠等特殊字符，最好 Encode 一下防止解析错误
-            val coverUrl = Uri.encode(coverUrl)
-            //拼出我们定义的那个网址暗号
-            val uriString =
-                "lijiemusic://comment?songId=$songId&songName=$songName&coverUrl=$coverUrl"
-            //Navigation会自动跨模块找到它！
-            findNavController().navigate(uriString.toUri())
+            val fragment = TheRouter.build(RoutePath.COMMENT_MAIN)
+                .withString(RouteParams.CommentParams.SONG_ID, id)
+                .withString(RouteParams.CommentParams.SONG_NAME, songName)
+                .withString(RouteParams.CommentParams.COVER_URL, coverUrl)
+                .createFragment<Fragment>()
+            (activity as? NavigationFragmentUtil)?.addFragment(fragment)
+            ToastUtil.popToast("正在跳往评论曲", requireContext())
         }
 
         // 分享按钮
